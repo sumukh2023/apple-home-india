@@ -1,0 +1,22 @@
+# --- packages/appliance_safety_timer.example.yaml ---
+# A geyser (water heater) that switches itself off 1 hour after being turned on,
+# even across Home Assistant restarts. Replace switch.bedroom_geyser with your plug.
+
+timer:
+  bedroom_geyser_auto_off:
+    name: Bedroom geyser auto-off
+    duration: "01:00:00"
+    restore: true            # required: resumes the countdown after a restart
+
+automation:
+  - id: bedroom_geyser_safety_timer
+    alias: "Bedroom geyser - 1 h safety cut-off"
+    use_blueprint:
+      path: apple-home-india/appliance_safety_timer.yaml
+      input:
+        appliance: switch.bedroom_geyser
+        countdown: timer.bedroom_geyser_auto_off
+        max_on_time:
+          hours: 1
+          minutes: 0
+          seconds: 0

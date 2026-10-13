@@ -1,0 +1,56 @@
+# --- packages/ir_send.example.yaml ---
+# One sender for every IR/RF command (ACs, fans, curtains). Copy once to
+# packages/ir_send.yaml, then list each appliance under `routes`.
+#
+# Commands are named <prefix>_<button>, e.g. bedroom_ac_22, bedroom_fan_speed_3.
+# For each command:
+#   1. If its prefix is listed in `routes` and that blaster is online, the code you
+#      learned in Home Assistant (remote.learn_command with device: <prefix>,
+#      command: <button>) is sent over your network by Tuya Local.
+#      No cloud and no Tuya developer account.
+#   2. Otherwise the Smart Life scene scene.<prefix>_<button> is fired through the
+#      Tuya cloud, if you created one. Use this as an optional backup, or as the only
+#      route for appliances your blaster cannot learn locally.
+#
+# If a command was never learned, the local send stops with an error in Home
+# Assistant's log rather than failing silently.
+
+script:
+  ir_send:
+    alias: IR/RF send (local first, Smart Life scene fallback)
+    mode: queued
+    max: 50
+    fields:
+      command:
+        description: "<prefix>_<button>, e.g. bedroom_ac_22"
+        example: bedroom_ac_22
+    variables:
+      # prefix: blaster (Tuya Local remote entity) and how many times to send.
+      # RF curtains are sent twice: harmless for open/close/stop, and covers a missed burst.
+      routes:
+        bedroom_ac: {remote: remote.bedroom_ir_blaster_local, repeats: 1}
+        bedroom_fan: {remote: remote.bedroom_ir_blaster_local, repeats: 1}
+        bedroom_curtain: {remote: remote.bedroom_ir_blaster_local, repeats: 2}
+      device: >-
+        {%- set ns = namespace(d='') -%}
+        {%- for p in routes -%}{%- if ns.d == '' and command.startswith(p ~ '_') -%}{%- set ns.d = p -%}{%- endif -%}{%- endfor -%}
+        {{- ns.d -}}
+      button: "{{ command[device | length + 1:] if device else '' }}"
+      remote: "{{ routes[device].remote if device else '' }}"
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ device != '' and states(remote) not in ['unavailable', 'unknown'] }}"
+        then:
+          - action: remote.send_command
+            target:
+              entity_id: "{{ remote }}"
+            data:
+              device: "{{ device }}"
+              command: "{{ button }}"
+              num_repeats: "{{ routes[device].repeats }}"
+              delay_secs: 0.3
+        else:
+          - action: scene.turn_on
+            target:
+              entity_id: "scene.{{ command }}"

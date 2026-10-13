@@ -1,0 +1,59 @@
+# --- packages/ir_ac.example.yaml ---
+# One infrared-only AC presented to Apple Home as a cool-only thermostat.
+#
+# Copy this file once per AC (e.g. packages/bedroom_ac.yaml) and replace every
+# "bedroom_ac" / "Bedroom AC" with your own name. Requires packages/ir_send.yaml.
+#
+# Learn these commands from your AC's remote, in cool mode, each one a full state
+# (see docs/04-setup-guide.md, section 5):
+#   bedroom_ac_on   (power on, at the power-on temperature, e.g. 24 °C)
+#   bedroom_ac_off  (power off)
+#   bedroom_ac_16 … bedroom_ac_30  (each setpoint, skipping the power-on one)
+#
+# Expose climate.bedroom_ac to Apple Home via the HomeKit Bridge, and exclude
+# switch.bedroom_ac_dummy_heater from it.
+
+# 0) Dummy switch: Generic Thermostat requires a "heater" switch. It never controls anything.
+template:
+  - switch:
+      - turn_on: []
+        turn_off: []
+        default_entity_id: switch.bedroom_ac_dummy_heater
+        name: Bedroom AC dummy heater
+        state: "off"
+
+# 1) Virtual room temperature mirrors the setpoint, so the thermostat never acts on its own.
+  - sensor:
+      - name: "Bedroom AC Room Temp (virtual)"
+        unique_id: bedroom_ac_room_temp_virtual
+        unit_of_measurement: "°C"
+        state: >
+          {% set t = state_attr('climate.bedroom_ac', 'temperature') %}
+          {{ t | float | round(0) if t else 24 }}
+
+# 2) Thermostat entity (cool/off only)
+climate:
+  - platform: generic_thermostat
+    name: "Bedroom AC"
+    unique_id: bedroom_ac_gt
+    heater: switch.bedroom_ac_dummy_heater
+    target_sensor: sensor.bedroom_ac_room_temp_virtual
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp_step: 1
+    cold_tolerance: 0
+    hot_tolerance: 0
+    precision: 1.0
+    initial_hvac_mode: "off"
+
+# 3) Power, reset and setpoint handling
+automation:
+  - id: bedroom_ac_ir_bridge
+    alias: "Bedroom AC - IR bridge"
+    use_blueprint:
+      path: apple-home-india/ir_ac_bridge.yaml
+      input:
+        climate_entity: climate.bedroom_ac
+        command_prefix: bedroom_ac
+        power_on_temperature: 24

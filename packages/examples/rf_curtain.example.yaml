@@ -1,0 +1,38 @@
+# --- packages/rf_curtain.example.yaml ---
+# One RF (433 MHz) curtain motor in Apple Home with open / close / stop.
+# Requires packages/ir_send.yaml and an RF-capable blaster.
+#
+# Copy once per curtain and replace every "bedroom_curtain" / "Bedroom Curtains".
+# Learn these commands from the curtain's remote (RF: command_type rf):
+#   bedroom_curtain_open, bedroom_curtain_close, bedroom_curtain_stop
+#
+# RF motors cannot report their position, so Home Assistant remembers open/closed.
+
+input_boolean:
+  bedroom_curtain_is_open:
+    name: Bedroom curtain is open
+
+template:
+  - cover:
+      - name: "Bedroom Curtains"
+        unique_id: bedroom_curtains_template
+        device_class: curtain
+        state: "{{ 'open' if is_state('input_boolean.bedroom_curtain_is_open', 'on') else 'closed' }}"
+        open_cover:
+          - action: script.ir_send
+            data:
+              command: bedroom_curtain_open
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.bedroom_curtain_is_open
+        close_cover:
+          - action: script.ir_send
+            data:
+              command: bedroom_curtain_close
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.bedroom_curtain_is_open
+        stop_cover:
+          - action: script.ir_send
+            data:
+              command: bedroom_curtain_stop

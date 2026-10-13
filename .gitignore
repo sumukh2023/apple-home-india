@@ -1,0 +1,22 @@
+# Allowlist: block everything by default, then allow only reviewed paths.
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+!/blueprints/
+!/packages/
+!/docs/
+!/tools/
+!/.github/
+!/.yamllint
+
+# Never commit these, even inside allowed folders.
+**/secrets.yaml
+**/.storage/
+**/*.db
+**/*.db-*
+**/*.log*
+**/*token*
+**/*.tar
+**/*emergency_kit*
+**/*.local.*

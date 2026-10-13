@@ -1,0 +1,42 @@
+# --- packages/fans.yaml ---
+# Shared speed handler for IR template fans (see ir_fan.example.yaml). Copy once.
+# Runs queued, so fast slider drags in Apple Home are applied in order instead of
+# being dropped. Helpers per fan: input_boolean.<fan>_power,
+# input_number.<fan>_percentage, learned commands <fan>_speed_1 … <fan>_speed_5
+# (sent through script.ir_send, packages/ir_send.yaml).
+script:
+  fan_ir_apply:
+    alias: Fan IR - apply speed
+    mode: queued
+    max: 20
+    fields:
+      helper:
+        description: Helper and command prefix, e.g. bedroom_fan
+      fan_entity:
+        description: The template fan entity
+      pct:
+        description: Requested percentage (0-100)
+    sequence:
+      - variables:
+          p: "{{ pct | int(0) }}"
+          speed: "{{ [((p + 19) // 20), 5] | min }}"
+      - if:
+          - condition: template
+            value_template: "{{ p <= 0 }}"
+        then:
+          # Keep the last speed in memory; just power off.
+          - action: fan.turn_off
+            target:
+              entity_id: "{{ fan_entity }}"
+        else:
+          - action: input_number.set_value
+            target:
+              entity_id: "input_number.{{ helper }}_percentage"
+            data:
+              value: "{{ p }}"
+          - action: script.ir_send
+            data:
+              command: "{{ helper }}_speed_{{ speed }}"
+          - action: input_boolean.turn_on
+            target:
+              entity_id: "input_boolean.{{ helper }}_power"

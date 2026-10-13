@@ -1,0 +1,58 @@
+# --- packages/ir_fan.example.yaml ---
+# One infrared-only ceiling fan presented to Apple Home with power + 5 speeds,
+# remembering its last speed while off. Requires packages/fans.yaml and packages/ir_send.yaml.
+#
+# Copy once per fan and replace every "bedroom_fan" / "Bedroom Fan". Learn these
+# commands from the fan's remote: bedroom_fan_power_off and bedroom_fan_speed_1 … _speed_5.
+
+# Helpers: IR fans cannot report state, so Home Assistant remembers it.
+input_boolean:
+  bedroom_fan_power:
+    name: Bedroom Fan power
+
+input_number:
+  bedroom_fan_percentage:
+    name: Bedroom Fan percentage
+    min: 0
+    max: 100
+    step: 20
+
+template:
+  - fan:
+      - name: "Bedroom Fan"
+        unique_id: bedroom_fan_tile
+        speed_count: 5
+        state: "{{ is_state('input_boolean.bedroom_fan_power', 'on') }}"
+        percentage: "{{ states('input_number.bedroom_fan_percentage') | int(0) }}"
+
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.bedroom_fan_power
+          # Resume the last speed, or 20 % if none is stored yet.
+          - action: fan.set_percentage
+            target:
+              entity_id: fan.bedroom_fan
+            data:
+              percentage: >
+                {% set last = states('input_number.bedroom_fan_percentage') | int(0) %}
+                {{ last if last > 0 else 20 }}
+
+        turn_off:
+          - action: script.ir_send
+            data:
+              command: bedroom_fan_power_off
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.bedroom_fan_power
+
+        set_percentage:
+          # Hand off to the queued script and return at once.
+          - action: script.turn_on
+            target:
+              entity_id: script.fan_ir_apply
+            data:
+              variables:
+                helper: bedroom_fan
+                fan_entity: fan.bedroom_fan
+                pct: "{{ percentage | int(0) }}"

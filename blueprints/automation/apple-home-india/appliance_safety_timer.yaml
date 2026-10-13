@@ -1,0 +1,110 @@
+blueprint:
+  name: Appliance safety timer (restart-safe auto-off)
+  description: >
+    Switches an appliance off a set time after it is turned on, e.g. a geyser
+    (water heater) left running. Unlike a simple "delay", the countdown survives
+    Home Assistant restarts and power cuts:
+
+    - Turning the appliance on starts a timer helper (create it with "Restore" on).
+    - Turning it off early cancels the timer.
+    - When the timer finishes, the appliance is switched off.
+    - One minute after every Home Assistant start, if the appliance is on but no
+      countdown is running (it expired while Home Assistant was down), it is
+      switched off. Restored timers do not fire "finished" for an expiry that
+      happened while Home Assistant was stopped, so this check is required.
+  domain: automation
+  author: Sumukh
+  input:
+    appliance:
+      name: Appliance switch
+      selector:
+        entity:
+          domain: switch
+    countdown:
+      name: Timer helper
+      description: >
+        A timer helper (Settings → Devices & services → Helpers → Timer)
+        with "Restore state and time when Home Assistant starts" enabled.
+      selector:
+        entity:
+          domain: timer
+    max_on_time:
+      name: Maximum on-time
+      default:
+        hours: 1
+        minutes: 0
+        seconds: 0
+      selector:
+        duration: {}
+    startup_grace:
+      name: Startup grace period
+      description: Wait after a restart before checking, so the switch's integration can reconnect.
+      default:
+        hours: 0
+        minutes: 1
+        seconds: 0
+      selector:
+        duration: {}
+
+mode: queued
+max: 10
+
+variables:
+  appliance: !input appliance
+  countdown: !input countdown
+
+triggers:
+  - trigger: state
+    entity_id: !input appliance
+    from: "off"
+    to: "on"
+    id: "on"
+  - trigger: state
+    entity_id: !input appliance
+    from: "on"
+    to: "off"
+    id: "off"
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: !input countdown
+    id: done
+  - trigger: homeassistant
+    event: start
+    id: boot
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: "on"
+        sequence:
+          - action: timer.start
+            target:
+              entity_id: !input countdown
+            data:
+              duration: !input max_on_time
+      - conditions:
+          - condition: trigger
+            id: "off"
+        sequence:
+          - action: timer.cancel
+            target:
+              entity_id: !input countdown
+      - conditions:
+          - condition: trigger
+            id: done
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: !input appliance
+      - conditions:
+          - condition: trigger
+            id: boot
+        sequence:
+          - delay: !input startup_grace
+          - condition: template
+            value_template: "{{ is_state(appliance, 'on') and is_state(countdown, 'idle') }}"
+          - action: switch.turn_off
+            target:
+              entity_id: !input appliance

@@ -1,0 +1,40 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  privacy:
+    name: Privacy scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 tools/privacy_scan.py .
+
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yamllint
+      - run: yamllint -c .yamllint blueprints packages .github
+
+  ha-config-check:
+    name: Home Assistant config check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./tools/build_test_config.sh .ci/config
+      - name: Run check_config in the official Home Assistant image
+        run: |
+          docker run --rm -v "$PWD/.ci/config:/config" \
+            ghcr.io/home-assistant/home-assistant:2026.10.1 \
+            python -m homeassistant --script check_config --config /config \
+            2>&1 | ./tools/fail_on_ha_errors.sh

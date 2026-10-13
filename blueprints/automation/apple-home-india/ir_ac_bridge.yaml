@@ -1,0 +1,104 @@
+blueprint:
+  name: IR AC bridge (learned IR codes → Apple Home thermostat)
+  description: >
+    Turns an infrared-only air conditioner into a real thermostat for Apple Home
+    (via the HomeKit Bridge), using IR codes learned from its own remote.
+    Works even when Tuya's AC library does not recognise your AC's remote.
+
+    Commands are sent through script.ir_send (packages/examples/ir_send.example.yaml):
+    locally via Tuya Local when the code was learned in Home Assistant, otherwise
+    through a Smart Life scene of the same name.
+
+    Required learned commands (one per full AC state, learned in cool mode):
+    <prefix>_on, <prefix>_off and <prefix>_16 … <prefix>_30
+    (the power-on temperature uses <prefix>_on instead of its own command).
+
+    Behaviour:
+    - Mode cool → <prefix>_on (the AC powers on at the power-on temperature).
+    - Mode off → <prefix>_off, then the slider resets to the power-on
+      temperature so the next power-on starts in a known state.
+    - Setpoint change while cooling → <prefix>_<temp>, rounded to whole °C.
+
+    Limitation: IR is one-way (open-loop control). Using the physical remote makes
+    Home Assistant's state drift from the AC's real state.
+  domain: automation
+  author: Sumukh
+  input:
+    climate_entity:
+      name: Virtual AC
+      description: The generic_thermostat climate entity for this AC (see packages/examples/ir_ac.example.yaml).
+      selector:
+        entity:
+          domain: climate
+    command_prefix:
+      name: Command prefix
+      description: "Prefix of the learned IR commands, e.g. bedroom_ac for bedroom_ac_on, bedroom_ac_22."
+      selector:
+        text: {}
+    power_on_temperature:
+      name: Power-on temperature
+      description: The setpoint your learned "on" command puts the AC at.
+      default: 24
+      selector:
+        number:
+          min: 16
+          max: 30
+          step: 1
+          unit_of_measurement: "°C"
+
+# queued (not restart): the power-off branch resets the setpoint, which re-triggers
+# this automation; queuing lets that run see mode "off" and do nothing.
+mode: queued
+max: 10
+
+variables:
+  climate_entity: !input climate_entity
+  prefix: !input command_prefix
+  on_temp: !input power_on_temperature
+
+triggers:
+  - trigger: state
+    entity_id: !input climate_entity
+    to: "cool"
+    id: power_on
+  - trigger: state
+    entity_id: !input climate_entity
+    to: "off"
+    id: power_off
+  - trigger: state
+    entity_id: !input climate_entity
+    attribute: temperature
+    id: setpoint
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: power_on
+        sequence:
+          - action: script.ir_send
+            data:
+              command: "{{ prefix }}_on"
+      - conditions:
+          - condition: trigger
+            id: power_off
+        sequence:
+          - action: script.ir_send
+            data:
+              command: "{{ prefix }}_off"
+          - action: climate.set_temperature
+            target:
+              entity_id: "{{ climate_entity }}"
+            data:
+              temperature: "{{ on_temp | int }}"
+      - conditions:
+          - condition: trigger
+            id: setpoint
+          - condition: template
+            value_template: "{{ is_state(climate_entity, 'cool') }}"
+        sequence:
+          - variables:
+              t: "{{ state_attr(climate_entity, 'temperature') | float(on_temp) | round(0) | int }}"
+          - action: script.ir_send
+            data:
+              command: "{{ prefix }}_{{ 'on' if t == (on_temp | int) else t }}"
