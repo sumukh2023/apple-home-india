@@ -27,6 +27,7 @@ PATTERNS = {
 ALLOWED_LINE = re.compile(r"^\s*author:\s")  # blueprint author credit
 # The author's full name is allowed in the README only (About the author, License).
 AUTHOR_NAME = {"README.md": "sumukh nayak"}
+REPO_SLUG = "sumukh2023/apple-home-india"
 
 words_file = ROOT / "tools" / "private_words.local.txt"
 private_words = []
@@ -49,6 +50,7 @@ for path in sorted(ROOT.rglob("*")):
             if re.search(rx, line):
                 print(f"{rel}:{n}: {label}"); problems += 1
         low = line.lower()
+        low = low.replace(REPO_SLUG, "")  # the repo's own public URL
         if str(rel) in AUTHOR_NAME:
             low = low.replace(AUTHOR_NAME[str(rel)], "")
         for w in private_words:
