@@ -192,7 +192,11 @@ You need a way to edit files in Home Assistant's `/config` folder. Install one o
 
 Then:
 
-1. Copy the folder `blueprints/automation/apple-home-india/` into `/config/blueprints/automation/` on your Home Assistant, so the blueprints end up at `/config/blueprints/automation/apple-home-india/ir_ac_bridge.yaml` and `…/appliance_safety_timer.yaml`.
+1. Add the two blueprints. The quickest way is the import buttons: each opens your Home Assistant at its blueprint import screen, then select **Preview** and **Import blueprint**.
+
+   [![Import the IR AC bridge blueprint into Home Assistant](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fsumukh2023%2Fapple-home-india%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsumukh2023%2Fir_ac_bridge.yaml) [![Import the appliance safety timer blueprint into Home Assistant](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fsumukh2023%2Fapple-home-india%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsumukh2023%2Fappliance_safety_timer.yaml)
+
+   Or copy the folder `blueprints/automation/sumukh2023/` into `/config/blueprints/automation/`. Either way the blueprints end up at `/config/blueprints/automation/sumukh2023/ir_ac_bridge.yaml` and `…/appliance_safety_timer.yaml`, which is the path the examples use.
 2. Create a `/config/packages/` folder and add to `configuration.yaml`:
 
    ```yaml

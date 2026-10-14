@@ -52,7 +52,7 @@ automation:
   - id: bedroom_ac_ir_bridge
     alias: "Bedroom AC - IR bridge"
     use_blueprint:
-      path: apple-home-india/ir_ac_bridge.yaml
+      path: sumukh2023/ir_ac_bridge.yaml
       input:
         climate_entity: climate.bedroom_ac
         command_prefix: bedroom_ac

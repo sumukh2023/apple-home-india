@@ -12,7 +12,7 @@ automation:
   - id: bedroom_geyser_safety_timer
     alias: "Bedroom geyser - 1 h safety cut-off"
     use_blueprint:
-      path: apple-home-india/appliance_safety_timer.yaml
+      path: sumukh2023/appliance_safety_timer.yaml
       input:
         appliance: switch.bedroom_geyser
         countdown: timer.bedroom_geyser_auto_off

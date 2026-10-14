@@ -60,8 +60,8 @@ IR and RF appliances can't report their state, so Home Assistant remembers it, a
 
 | Path | What it is |
 |---|---|
-| [`blueprints/automation/apple-home-india/ir_ac_bridge.yaml`](blueprints/automation/apple-home-india/ir_ac_bridge.yaml) | Turns an IR-only AC into an Apple Home thermostat using codes learned from its remote |
-| [`blueprints/automation/apple-home-india/appliance_safety_timer.yaml`](blueprints/automation/apple-home-india/appliance_safety_timer.yaml) | Restart-safe automatic cut-off for geysers and other appliances |
+| [`blueprints/automation/sumukh2023/ir_ac_bridge.yaml`](blueprints/automation/sumukh2023/ir_ac_bridge.yaml) | Turns an IR-only AC into an Apple Home thermostat using codes learned from its remote<br>[![Import the IR AC bridge blueprint into Home Assistant](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fsumukh2023%2Fapple-home-india%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsumukh2023%2Fir_ac_bridge.yaml) |
+| [`blueprints/automation/sumukh2023/appliance_safety_timer.yaml`](blueprints/automation/sumukh2023/appliance_safety_timer.yaml) | Restart-safe automatic cut-off for geysers and other appliances<br>[![Import the appliance safety timer blueprint into Home Assistant](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fsumukh2023%2Fapple-home-india%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsumukh2023%2Fappliance_safety_timer.yaml) |
 | [`packages/examples/`](packages/examples/) | Copy-and-rename examples: local-first IR/RF sender (`ir_send`), IR AC, IR fan with 5 speeds, RF curtain, shared fan script, geyser timer |
 | [`docs/`](docs/README.md) | Setup guide, design notes, bill of materials, case study, history |
 | [`tools/`](tools/) | Privacy scan and the config-validation scripts used by CI |

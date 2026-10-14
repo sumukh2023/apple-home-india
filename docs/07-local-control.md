@@ -71,7 +71,7 @@ For a geyser, an "off" that silently fails is dangerous, and a local connection 
 
 ```yaml
 use_blueprint:
-  path: apple-home-india/appliance_safety_timer.yaml
+  path: sumukh2023/appliance_safety_timer.yaml
   input:
     appliance: switch.bedroom_geyser_local          # local switch
     backup_switch: [switch.bedroom_geyser_cloud]    # layer 1
