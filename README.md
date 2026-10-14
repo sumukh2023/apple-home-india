@@ -4,7 +4,11 @@
 
 Tuya switch modules, plugs and IR blasters are cheap and sold everywhere in India, but they don't work with Apple Home, and most Indian ACs and fans are infrared-only. This project uses Home Assistant on a Raspberry Pi to turn all of them into native Apple Home accessories: lights, thermostats, fans, curtains and geysers, controlled from the Home app and Siri, **with no cloud and no internet needed**.
 
-**[▶ Watch the 48-second demo](docs/media/demo.mp4)**
+
+
+https://github.com/user-attachments/assets/e45b489c-16ab-48d8-aee3-de4f91f7469c
+
+
 
 > **New here? Start with the [setup guide](docs/04-setup-guide.md).**
 
