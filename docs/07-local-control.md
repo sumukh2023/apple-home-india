@@ -171,7 +171,7 @@ If the internet is also down, a stalled blaster's appliances won't respond until
 |---|---|---|
 | "Already in progress" when adding a device | An earlier setup attempt timed out and is still holding the device | Restart Home Assistant and add it again |
 | Tuya Local asks for the QR code again | Its Smart Life sign-in ends when Home Assistant restarts | Scan a new code; devices already added are unaffected |
-| A device offers only unrelated profiles (pet feeders, locks…) | It reports too little locally for Tuya Local to identify it (seen on some single-function Wi-Fi sockets) | Keep it on the cloud, or replace it with a model Tuya Local supports |
+| A device offers only unrelated profiles (pet feeders, locks…), or its state stays "unknown" after it is added | It rejects Tuya's standard status request and only answers when asked for specific data points ("device22" quirk; seen on some single-function Wi-Fi sockets). With debug logging on, Tuya Local logs `data unvalid` | Add it anyway with the closest matching profile (for a plain socket, `simple_switch_timer`), then open the device's Tuya Local **Configure** and set **Protocol version** to **3.22**, which means 3.3 with the workaround enabled ([Tuya Local's notes](https://github.com/make-all/tuya-local#protocol_version)). Use 3.42 or 3.52 for 3.4 or 3.5 devices |
 | Old devices listed under **Discovered** | Tuya Local hears devices you haven't added | Ignore them; they can still be added later |
 | Tiles control the right device but show "No Response" after a restart | Apple Home received new accessories | See section 3.4 |
 
@@ -180,13 +180,13 @@ If the internet is also down, a stalled blaster's appliances won't respond until
 | | Count |
 |---|---|
 | Light channels moved from cloud to local | 22 |
-| Plugs and geysers moved to local | 3 |
+| Plugs and geysers moved to local | 4 |
 | IR blasters on local control | 5 |
 | ACs, fans and curtains on local control (with cloud fallback) | 11 |
 | Smart Life scenes replaced by local codes | 115 of 115 (106 exported directly, 9 reused from an identical fan model's learned codes) |
 | Median command latency | 0.35 s local vs 0.67 s cloud |
 
-Everything except one Wi-Fi socket that Tuya Local can't identify now runs with no internet connection.
+Every device now runs with no internet connection. One Wi-Fi socket needed the protocol 3.22 setting from section 6.
 
 ## 8. Rolling back
 

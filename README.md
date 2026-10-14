@@ -76,7 +76,6 @@ The full checklist is in [setup guide, section 0](docs/04-setup-guide.md#0-befor
 
 - **IR and RF are one-way.** Appliances can't report their real state; using the physical remote makes Home Assistant's remembered state drift until the next command from Apple Home.
 - **RF learning depends on the blaster.** Not every IR + RF blaster supports learning RF over the local network; such curtains can fall back to a Smart Life scene through the cloud.
-- **A few Tuya devices can't be controlled locally**, because they report too little to be identified. They can stay on the cloud or be replaced.
 
 ## Validation
 

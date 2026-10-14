@@ -36,7 +36,6 @@ Everything runs over the home network: it keeps working when the internet is dow
 ## What it doesn't do
 
 - **IR and RF are one-way.** An AC or fan can't report its real state; Home Assistant remembers what it last sent. Using the physical remote makes the two drift apart until the next command from Apple Home.
-- **Some Tuya devices can't be controlled locally.** A few report too little to be identified (see [07-local-control.md](07-local-control.md), section 6); they can stay on the cloud or be replaced.
 
 ## Read next
 
