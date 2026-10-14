@@ -1,0 +1,74 @@
+name: Works with my device
+description: Report a device or setup you've tried with this project, whether it worked or not.
+title: "[Device] "
+labels: ["device report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Every report helps someone in India pick hardware that works.
+        **Never paste local keys, device IDs, IP addresses or your Tuya user code.**
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Brand, model and where you bought it.
+      placeholder: "e.g. Wipro 16A smart plug (Amazon.in)"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Device type
+      options:
+        - Switch module behind a modular switch
+        - Smart plug
+        - Smart plug on a geyser
+        - IR blaster
+        - IR + RF blaster
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works fully local
+        - Works locally after a setting change (describe below)
+        - Works only through the cloud
+        - Doesn't work
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Tuya Local profile and protocol version
+      placeholder: "e.g. simple_switch_timer, 3.22"
+  - type: dropdown
+    id: appliance
+    attributes:
+      label: Appliance it controls (IR/RF only)
+      options:
+        - Not an IR/RF device
+        - Air conditioner
+        - Fan
+        - Curtain motor
+        - Other
+  - type: input
+    id: ha
+    attributes:
+      label: Home Assistant version
+      placeholder: "e.g. 2026.10.1"
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything that helped or got in the way.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I haven't included local keys, device IDs, IP addresses or my Tuya user code.
+          required: true

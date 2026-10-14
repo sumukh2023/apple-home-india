@@ -1,14 +1,26 @@
-# apple-home-india
+<p align="center">
+  <img src="docs/media/logo.svg" width="112" alt="apple-home-india logo">
+</p>
 
-**Make affordable Indian smart devices work natively in Apple Home, entirely over your home network.**
+<h1 align="center">apple-home-india</h1>
+
+<p align="center">
+  <b>Make affordable Indian smart devices work natively in Apple Home,<br>entirely over your home network.</b>
+</p>
+
+<p align="center">
+  <img alt="Home Assistant 2026.10" src="https://img.shields.io/badge/Home%20Assistant-2026.10-18BCF2?logo=homeassistant&logoColor=white"> <img alt="Apple Home via HomeKit Bridge" src="https://img.shields.io/badge/Apple%20Home-HomeKit%20Bridge-111111"> <img alt="Local-first control" src="https://img.shields.io/badge/control-local--first-2EA44F"> <a href="https://github.com/sumukh2023/apple-home-india/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/sumukh2023/apple-home-india/actions/workflows/validate.yml/badge.svg"></a> <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue"></a>
+</p>
 
 Tuya switch modules, plugs and IR blasters are cheap and sold everywhere in India, but they don't work with Apple Home, and most Indian ACs and fans are infrared-only. This project uses Home Assistant on a Raspberry Pi to turn all of them into native Apple Home accessories: lights, thermostats, fans, curtains and geysers, controlled from the Home app and Siri, **with no cloud and no internet needed**.
 
-
+<h3 align="center">▶ Watch the 48-second demo</h3>
 
 https://github.com/user-attachments/assets/e45b489c-16ab-48d8-aee3-de4f91f7469c
 
-
+<p align="center">
+  <sub>Every command in the video runs over the local network. <a href="docs/media/apple-home-india-demo.mp4">Download the video</a></sub>
+</p>
 
 > **New here? Start with the [setup guide](docs/04-setup-guide.md).**
 

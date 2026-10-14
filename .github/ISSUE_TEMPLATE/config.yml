@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A Tuya device isn't recognised by Tuya Local
+    url: https://github.com/make-all/tuya-local/issues
+    about: Device profiles live in Tuya Local. Report new devices there, then tell us here if it works with this project.
+  - name: Home Assistant question
+    url: https://community.home-assistant.io/
+    about: General Home Assistant help is fastest on the community forum.
