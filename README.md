@@ -112,8 +112,6 @@ Every push runs three checks ([`.github/workflows/validate.yml`](.github/workflo
 
 **Sumukh Nayak** is a Grade 12 student in Bengaluru, India, with interests in web development and AI/ML. He designed, built and maintains this system in his family home, where it has run every day since August 2025. It started from a simple frustration: Apple Home is a great place to control a home, but almost nothing sold in India works with it, and the retrofit alternatives cost lakhs. This repository is the result, written up so that anyone can do the same for a fraction of the price.
 
-Before this, he built a charity carnival website for his school, whose design went on to inspire two sister campuses for their own carnivals.
-
 ## License
 
 Released under the [MIT License](LICENSE). © 2026 Sumukh Nayak.
