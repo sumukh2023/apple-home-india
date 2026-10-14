@@ -63,20 +63,21 @@ The HomeKit Bridge stores which accessory number belongs to which entity in `/co
 
 ### 3.5 Safety-critical appliances (geysers)
 
-For a geyser, an "off" that silently fails is dangerous, and a local connection can drop. The author's setup uses three layers:
+For a geyser, an "off" that silently fails is dangerous, and a local connection can drop. The `appliance_safety_timer` blueprint supports three layers:
 
-1. **Keep the cloud entity enabled** (hidden, renamed `…_cloud`) instead of disabling it. The auto-off automation switches off through **both** the local and the cloud entity, each with `continue_on_error: true`, so either path can do it.
-2. **Use the plug's own countdown** as a hardware backstop. Most Tuya plugs have a built-in countdown (Tuya Local exposes it as a `time.…_timer` entity). When the geyser turns on, set it a few minutes longer than the Home Assistant timer; the plug then switches itself off even if Home Assistant, the Pi or Wi-Fi is down. Set it back to `00:00:00` when the geyser turns off.
+1. **Keep the cloud entity enabled** (hidden, renamed `…_cloud`) instead of disabling it, and give it to the blueprint as `backup_switch`. Turning either entity on starts the countdown, and the cut-off is sent through **both**, so either path can do it.
+2. **Use the plug's own countdown** as a hardware backstop. Most Tuya plugs have a built-in countdown, which Tuya Local exposes as a `time.…_timer` entity; give it to the blueprint as `hardware_countdown`. When the geyser turns on, the blueprint sets it to the maximum on-time plus `hardware_margin` (5 minutes by default), so the plug switches itself off even if Home Assistant, the Pi or Wi-Fi is down. It is cleared when the geyser turns off. The plug's countdown *flips* the relay when it runs out, so never arm it by hand while the geyser is off.
 3. **Set the plug's power-on behaviour to off**, so a geyser doesn't come back on by itself after a power cut.
 
 ```yaml
-# When the geyser turns on (in addition to starting the HA timer):
-- action: time.set_value
-  continue_on_error: true
-  target:
-    entity_id: time.bedroom_geyser_local_timer
-  data:
-    time: "01:05:00"   # HA timer is 1 h; the plug cuts off 5 min later if HA didn't
+use_blueprint:
+  path: apple-home-india/appliance_safety_timer.yaml
+  input:
+    appliance: switch.bedroom_geyser_local          # local switch
+    backup_switch: [switch.bedroom_geyser_cloud]    # layer 1
+    countdown: timer.bedroom_geyser_auto_off
+    hardware_countdown: [time.bedroom_geyser_local_timer]   # layer 2
+    max_on_time: {hours: 1, minutes: 0, seconds: 0}  # the plug's own countdown runs 1 h 05
 ```
 
 ## 4. IR and RF appliances (ACs, fans, curtains)

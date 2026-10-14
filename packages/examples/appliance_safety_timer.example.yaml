@@ -20,3 +20,9 @@ automation:
           hours: 1
           minutes: 0
           seconds: 0
+        # Optional extra layers (docs/07-local-control.md, section 3.5). Delete
+        # these two lines if your plug is on the cloud only or has no countdown.
+        # A second switch for the same plug, e.g. its cloud Tuya entity:
+        backup_switch: [switch.bedroom_geyser_cloud]
+        # The plug's own countdown (Tuya Local "… Timer"); armed at 1 h 05:
+        hardware_countdown: [time.bedroom_geyser_timer]

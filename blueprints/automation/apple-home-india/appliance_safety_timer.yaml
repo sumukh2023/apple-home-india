@@ -12,6 +12,18 @@ blueprint:
       countdown is running (it expired while Home Assistant was down), it is
       switched off. Restored timers do not fire "finished" for an expiry that
       happened while Home Assistant was stopped, so this check is required.
+
+    Two optional extra layers for safety-critical appliances:
+
+    - **Backup switch:** a second entity for the same appliance, e.g. its cloud
+      Tuya switch next to the local one. Turning it on also starts the countdown,
+      and every switch-off is sent through both, so the appliance still turns off
+      if one path is down.
+    - **Hardware countdown:** the plug's own countdown (a `time` entity, e.g.
+      "… Timer" from Tuya Local). It is armed with the maximum on-time plus a
+      margin when the appliance turns on and cleared when it turns off, so the
+      plug switches itself off even if Home Assistant is not running. Only use it
+      on plugs whose countdown turns them **off** when it runs out while on.
   domain: automation
   author: Sumukh
   input:
@@ -36,6 +48,31 @@ blueprint:
         seconds: 0
       selector:
         duration: {}
+    backup_switch:
+      name: Backup switch (optional)
+      description: Another switch entity for the same appliance, e.g. its cloud switch.
+      default: []
+      selector:
+        entity:
+          domain: switch
+          multiple: true
+    hardware_countdown:
+      name: Hardware countdown (optional)
+      description: The plug's own countdown, a `time` entity. Leave empty if the plug has none.
+      default: []
+      selector:
+        entity:
+          domain: time
+          multiple: true
+    hardware_margin:
+      name: Hardware countdown margin
+      description: How much longer than the maximum on-time the plug's own countdown runs, so Home Assistant normally switches off first.
+      default:
+        hours: 0
+        minutes: 5
+        seconds: 0
+      selector:
+        duration: {}
     startup_grace:
       name: Startup grace period
       description: Wait after a restart before checking, so the switch's integration can reconnect.
@@ -52,10 +89,30 @@ max: 10
 variables:
   appliance: !input appliance
   countdown: !input countdown
+  backup: !input backup_switch
+  hardware: !input hardware_countdown
+  max_on: !input max_on_time
+  margin: !input hardware_margin
+  switches: "{{ [appliance] + (backup if backup is list else [backup]) | reject('eq', '') | list }}"
+  hardware_list: "{{ (hardware if hardware is list else [hardware]) | reject('eq', '') | list }}"
+  # Maximum on-time + margin as HH:MM:SS (the duration selector may also give days).
+  hardware_time: >-
+    {%- set ns = namespace(s=0) -%}
+    {%- for d in [max_on, margin] -%}
+      {%- set ns.s = ns.s + (d.days | default(0) | int(0)) * 86400 + (d.hours | default(0) | int(0)) * 3600
+          + (d.minutes | default(0) | int(0)) * 60 + (d.seconds | default(0) | int(0)) -%}
+    {%- endfor -%}
+    {%- set s = [ns.s, 86399] | min -%}
+    {{ '%02d:%02d:%02d' | format(s // 3600, (s % 3600) // 60, s % 60) }}
 
 triggers:
   - trigger: state
     entity_id: !input appliance
+    from: "off"
+    to: "on"
+    id: "on"
+  - trigger: state
+    entity_id: !input backup_switch
     from: "off"
     to: "on"
     id: "on"
@@ -84,6 +141,16 @@ actions:
               entity_id: !input countdown
             data:
               duration: !input max_on_time
+          - if:
+              - condition: template
+                value_template: "{{ hardware_list | count > 0 }}"
+            then:
+              - action: time.set_value
+                continue_on_error: true
+                target:
+                  entity_id: "{{ hardware_list }}"
+                data:
+                  time: "{{ hardware_time }}"
       - conditions:
           - condition: trigger
             id: "off"
@@ -91,20 +158,38 @@ actions:
           - action: timer.cancel
             target:
               entity_id: !input countdown
+          - if:
+              - condition: template
+                value_template: "{{ hardware_list | count > 0 }}"
+            then:
+              - action: time.set_value
+                continue_on_error: true
+                target:
+                  entity_id: "{{ hardware_list }}"
+                data:
+                  time: "00:00:00"
       - conditions:
           - condition: trigger
             id: done
         sequence:
-          - action: switch.turn_off
-            target:
-              entity_id: !input appliance
+          - repeat:
+              for_each: "{{ switches }}"
+              sequence:
+                - action: homeassistant.turn_off
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item }}"
       - conditions:
           - condition: trigger
             id: boot
         sequence:
           - delay: !input startup_grace
           - condition: template
-            value_template: "{{ is_state(appliance, 'on') and is_state(countdown, 'idle') }}"
-          - action: switch.turn_off
-            target:
-              entity_id: !input appliance
+            value_template: "{{ switches | select('is_state', 'on') | list | count > 0 and is_state(countdown, 'idle') }}"
+          - repeat:
+              for_each: "{{ switches }}"
+              sequence:
+                - action: homeassistant.turn_off
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item }}"

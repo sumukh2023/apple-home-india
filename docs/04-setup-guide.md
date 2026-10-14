@@ -250,9 +250,9 @@ RF motors cannot report their position, so Home Assistant remembers whether the 
 
 Uses `packages/examples/appliance_safety_timer.example.yaml` and the `appliance_safety_timer` blueprint.
 
-1. Copy the example to `packages/bedroom_geyser.yaml`. Replace `switch.bedroom_geyser` with your geyser plug's entity ID (from step 4), and set the maximum on-time in both places (the timer's `duration` and `max_on_time`). Use a **16 A** plug for a geyser.
+1. Copy the example to `packages/bedroom_geyser.yaml`. Replace `switch.bedroom_geyser` with your geyser plug's entity ID (from step 4), and set the maximum on-time in both places (the timer's `duration` and `max_on_time`). If the plug is on Tuya Local, fill in `backup_switch` and `hardware_countdown` as described in [07-local-control.md](07-local-control.md), section 3.5; otherwise delete those two lines. Use a **16 A** plug for a geyser.
 2. In Home Assistant, open the plug's device page (**Settings → Devices & services → Tuya Local →** your plug) and, under **Configuration**, set its **power-on behaviour** (it may be called *initial state*) to **off**. After a power cut the geyser then stays off instead of switching back on by itself.
-3. Test: turn the geyser on and confirm the countdown starts; turn it off and confirm the countdown is cancelled.
+3. Test: turn the geyser on and confirm the countdown starts (and, if set, the plug's own timer shows the on-time plus 5 minutes); turn it off and confirm both are cancelled.
 
 The countdown is restorable, so it survives Home Assistant restarts. After every start-up the blueprint waits a short grace period (`startup_grace`), then switches the appliance off if it is on with no countdown running.
 
